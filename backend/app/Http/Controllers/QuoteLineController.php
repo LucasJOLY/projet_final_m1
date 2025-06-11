@@ -2,41 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
+use App\Models\QuoteLine;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Validation\Rule;
-use App\Http\Requests\InvoiceRequest;
+use App\Http\Requests\QuoteLineRequest;
 
-class InvoiceController extends Controller
+class QuoteLineController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Invoice::whereHas('quote.project.client', function ($q) use ($user) {
+        $query = QuoteLine::whereHas('quote.project.client', function ($q) use ($user) {
             $q->where('account_id', $user->id);
         });
 
         $fields = [
             'quote_id',
-            'invoice_number',
-            'status',
-            'issue_date',
-            'payment_due_date',
-            'payment_type',
-            'actual_payment_date',
+            'description',
+            'unit_price',
+            'quantity',
             'created_at',
             'updated_at',
         ];
+
         foreach ($fields as $field) {
             if ($request->filled($field)) {
                 $query->where($field, $request->input($field));
             }
             if ($request->filled($field . '_min')) {
-                $query->where($field, '>=', $request->input($field + '_min'));
+                $query->where($field, '>=', $request->input($field . '_min'));
             }
-            if ($request->filled($field + '_max')) {
-                $query->where($field, '<=', $request->input($field + '_max'));
+            if ($request->filled($field . '_max')) {
+                $query->where($field, '<=', $request->input($field . '_max'));
             }
         }
 
@@ -53,37 +50,37 @@ class InvoiceController extends Controller
         return JsonResource::collection($query->paginate($perPage));
     }
 
-    public function store(InvoiceRequest $request)
+    public function store(QuoteLineRequest $request)
     {
         $validated = $request->validated();
-        $invoice = Invoice::create($validated);
-        return new JsonResource($invoice);
+        $quoteLine = QuoteLine::create($validated);
+        return new JsonResource($quoteLine);
     }
 
-    public function show(Invoice $invoice, Request $request)
+    public function show(QuoteLine $quoteLine, Request $request)
     {
-        if ($request->user()->id !== $invoice->quote->project->client->account_id) {
+        if ($request->user()->id !== $quoteLine->quote->project->client->account_id) {
             return response()->json(['message' => 'Accès interdit.'], 403);
         }
-        return new JsonResource($invoice);
+        return new JsonResource($quoteLine);
     }
 
-    public function update(InvoiceRequest $request, Invoice $invoice)
+    public function update(QuoteLineRequest $request, QuoteLine $quoteLine)
     {
-        if ($request->user()->id !== $invoice->quote->project->client->account_id) {
+        if ($request->user()->id !== $quoteLine->quote->project->client->account_id) {
             return response()->json(['message' => 'Accès interdit.'], 403);
         }
         $validated = $request->validated();
-        $invoice->update($validated);
-        return new JsonResource($invoice);
+        $quoteLine->update($validated);
+        return new JsonResource($quoteLine);
     }
 
-    public function destroy(Invoice $invoice, Request $request)
+    public function destroy(QuoteLine $quoteLine, Request $request)
     {
-        if ($request->user()->id !== $invoice->project->client->account_id) {
+        if ($request->user()->id !== $quoteLine->quote->project->client->account_id) {
             return response()->json(['message' => 'Accès interdit.'], 403);
         }
-        $invoice->delete();
-        return response()->json(['message' => 'Facture supprimée avec succès.']);
+        $quoteLine->delete();
+        return response()->json(['message' => 'Ligne de devis supprimée avec succès.']);
     }
 }

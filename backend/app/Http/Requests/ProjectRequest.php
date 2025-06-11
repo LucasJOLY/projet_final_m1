@@ -18,7 +18,7 @@ class ProjectRequest extends FormRequest
         return [
             'client_id' => 'required|exists:clients,id',
             'name' => 'required|string|max:255',
-            'status' => 'required|string|max:100',
+            'status' => 'required|integer',
         ];
     }
 
@@ -31,8 +31,7 @@ class ProjectRequest extends FormRequest
             'name.string' => 'Le nom du projet doit être une chaîne de caractères.',
             'name.max' => 'Le nom du projet ne doit pas dépasser 255 caractères.',
             'status.required' => 'Le statut est requis.',
-            'status.string' => 'Le statut doit être une chaîne de caractères.',
-            'status.max' => 'Le statut ne doit pas dépasser 100 caractères.',
+            'status.integer' => 'Le statut doit être un entier.',
         ];
     }
 

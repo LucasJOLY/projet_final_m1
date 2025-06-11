@@ -16,12 +16,12 @@ class InvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'project_id' => 'required|exists:projects,id',
+            'quote_id' => 'required|exists:quotes,id',
             'invoice_number' => 'required|integer',
-            'status' => 'required|string|max:100',
+            'status' => 'required|integer',
             'issue_date' => 'required|date',
             'payment_due_date' => 'required|date',
-            'payment_type' => 'required|string|max:100',
+            'payment_type' => 'required|integer',
             'actual_payment_date' => 'nullable|date',
             'footer_note' => 'nullable|string',
         ];
@@ -30,20 +30,18 @@ class InvoiceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'project_id.required' => 'L\'identifiant du projet est requis.',
-            'project_id.exists' => 'Le projet spécifié n\'existe pas.',
+            'quote_id.required' => 'L\'identifiant du devis est requis.',
+            'quote_id.exists' => 'Le devis spécifié n\'existe pas.',
             'invoice_number.required' => 'Le numéro de facture est requis.',
             'invoice_number.integer' => 'Le numéro de facture doit être un entier.',
             'status.required' => 'Le statut est requis.',
-            'status.string' => 'Le statut doit être une chaîne de caractères.',
-            'status.max' => 'Le statut ne doit pas dépasser 100 caractères.',
+            'status.integer' => 'Le statut doit être un entier.',
             'issue_date.required' => 'La date d\'émission est requise.',
             'issue_date.date' => 'La date d\'émission doit être une date valide.',
             'payment_due_date.required' => 'La date d\'échéance est requise.',
             'payment_due_date.date' => 'La date d\'échéance doit être une date valide.',
             'payment_type.required' => 'Le type de paiement est requis.',
-            'payment_type.string' => 'Le type de paiement doit être une chaîne de caractères.',
-            'payment_type.max' => 'Le type de paiement ne doit pas dépasser 100 caractères.',
+            'payment_type.integer' => 'Le type de paiement doit être un entier.',
             'actual_payment_date.date' => 'La date de paiement réelle doit être une date valide.',
             'footer_note.string' => 'La note de bas de page doit être une chaîne de caractères.',
         ];

@@ -35,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('accounts', App\Http\Controllers\AccountController::class);
     Route::apiResource('clients', App\Http\Controllers\ClientController::class);
     Route::apiResource('projects', App\Http\Controllers\ProjectController::class);
+    Route::apiResource('quotes', App\Http\Controllers\QuoteController::class);
+    Route::apiResource('quote-lines', App\Http\Controllers\QuoteLineController::class);
     Route::apiResource('invoices', App\Http\Controllers\InvoiceController::class);
-    Route::apiResource('invoice-items', App\Http\Controllers\InvoiceItemController::class);
+    Route::apiResource('invoice-lines', App\Http\Controllers\InvoiceLineController::class);
 });

@@ -22,7 +22,7 @@ class AccountFactory extends Factory
             'max_annual_revenue' => $this->faker->randomFloat(2, 10000, 1000000),
             'expense_rate' => $this->faker->randomFloat(2, 0, 1),
             'password' => bcrypt('password'),
-            'role' => $this->faker->randomElement(['admin', 'user']),
+            'is_admin' => $this->faker->boolean(),
         ];
     }
 }

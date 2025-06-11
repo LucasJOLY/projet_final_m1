@@ -10,12 +10,12 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
+            $table->foreignId('quote_id')->constrained('quotes')->onDelete('cascade');
             $table->integer('invoice_number');
-            $table->string('status');
+            $table->tinyInteger('status')->default(0)->comment('0 = en cours de création, 1 = édité, 2 = envoyé, 3 = payé');
             $table->date('issue_date');
             $table->date('payment_due_date');
-            $table->string('payment_type');
+            $table->tinyInteger('payment_type')->default(0)->comment('0 = chèque, 1 = virement, 2 = autre');
             $table->date('actual_payment_date')->nullable();
             $table->text('footer_note')->nullable();
             $table->timestamps();

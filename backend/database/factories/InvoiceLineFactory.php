@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\InvoiceItem;
+use App\Models\InvoiceLine;
 use App\Models\Invoice;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InvoiceItemFactory extends Factory
+class InvoiceLineFactory extends Factory
 {
-    protected $model = InvoiceItem::class;
+    protected $model = InvoiceLine::class;
 
     public function definition(): array
     {

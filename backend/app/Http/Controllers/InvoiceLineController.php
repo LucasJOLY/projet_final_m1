@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\InvoiceItem;
+use App\Models\InvoiceLine;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Validation\Rule;
-use App\Http\Requests\InvoiceItemRequest;
+use App\Http\Requests\InvoiceLineRequest;
 
-class InvoiceItemController extends Controller
+class InvoiceLineController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = InvoiceItem::whereHas('invoice.project.client', function ($q) use ($user) {
+        $query = InvoiceLine::whereHas('invoice.quote.project.client', function ($q) use ($user) {
             $q->where('account_id', $user->id);
         });
 
@@ -50,24 +50,24 @@ class InvoiceItemController extends Controller
         return JsonResource::collection($query->paginate($perPage));
     }
 
-    public function store(InvoiceItemRequest $request)
+    public function store(InvoiceLineRequest $request)
     {
         $validated = $request->validated();
-        $item = InvoiceItem::create($validated);
+        $item = InvoiceLine::create($validated);
         return new JsonResource($item);
     }
 
-    public function show(InvoiceItem $invoiceItem, Request $request)
+    public function show(InvoiceLine $invoiceItem, Request $request)
     {
-        if ($request->user()->id !== $invoiceItem->invoice->project->client->account_id) {
+        if ($request->user()->id !== $invoiceItem->invoice->quote->project->client->account_id) {
             return response()->json(['message' => 'Accès interdit.'], 403);
         }
         return new JsonResource($invoiceItem);
     }
 
-    public function update(InvoiceItemRequest $request, InvoiceItem $invoiceItem)
+    public function update(InvoiceLineRequest $request, InvoiceLine $invoiceItem)
     {
-        if ($request->user()->id !== $invoiceItem->invoice->project->client->account_id) {
+        if ($request->user()->id !== $invoiceItem->invoice->quote->project->client->account_id) {
             return response()->json(['message' => 'Accès interdit.'], 403);
         }
         $validated = $request->validated();
@@ -75,9 +75,9 @@ class InvoiceItemController extends Controller
         return new JsonResource($invoiceItem);
     }
 
-    public function destroy(InvoiceItem $invoiceItem, Request $request)
+    public function destroy(InvoiceLine $invoiceItem, Request $request)
     {
-        if ($request->user()->id !== $invoiceItem->invoice->project->client->account_id) {
+        if ($request->user()->id !== $invoiceItem->invoice->quote->project->client->account_id) {
             return response()->json(['message' => 'Accès interdit.'], 403);
         }
         $invoiceItem->delete();

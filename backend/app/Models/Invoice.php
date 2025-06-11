@@ -10,7 +10,7 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'project_id',
+        'quote_id',
         'invoice_number',
         'status',
         'issue_date',
@@ -20,13 +20,14 @@ class Invoice extends Model
         'footer_note',
     ];
 
-    public function project()
+
+    public function quote()
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Quote::class);
     }
 
     public function items()
     {
-        return $this->hasMany(InvoiceItem::class);
+        return $this->hasMany(InvoiceLine::class);
     }
 }

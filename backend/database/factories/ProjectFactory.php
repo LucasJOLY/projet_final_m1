@@ -15,7 +15,7 @@ class ProjectFactory extends Factory
         return [
             'client_id' => Client::factory(),
             'name' => $this->faker->word() . ' Project',
-            'status' => $this->faker->randomElement(['en cours', 'terminé', 'en attente']),
+            'status' => $this->faker->randomElement([0, 1, 2, 3, 4, 5]),
         ];
     }
 }

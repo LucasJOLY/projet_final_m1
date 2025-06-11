@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
             $table->string('name');
-            $table->string('status');
+            $table->tinyInteger('status')->default(0)->comment('0 = prospect, 1 = devis envoyé, 2 = devis accepté, 3 = démarré, 4 = terminé, 5 = annulé');
             $table->timestamps();
         });
     }

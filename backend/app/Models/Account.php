@@ -20,7 +20,7 @@ class Account extends Authenticatable
         'max_annual_revenue',
         'expense_rate',
         'password',
-        'role',
+        'is_admin',
     ];
 
     protected $hidden = [

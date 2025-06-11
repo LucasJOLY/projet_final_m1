@@ -19,7 +19,7 @@ return new class extends Migration
             $table->float('max_annual_revenue', 15, 2);
             $table->float('expense_rate', 8, 2);
             $table->string('password');
-            $table->enum('role', ['admin', 'user']);
+            $table->boolean('is_admin')->default(false);
             $table->timestamps();
         });
     }
