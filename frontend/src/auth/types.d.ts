@@ -18,6 +18,7 @@ interface User {
 interface AuthState {
   token: string | null;
   authUser: User | null;
+  resetTokenValid: boolean | null;
 }
 
 interface PasswordStrength {

@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AccountRequest;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Requests\RegisterAccountRequest;
 use App\Http\Requests\LoginAccountRequest;
 
 class AccountAuthController extends Controller
 {
-    public function register(RegisterAccountRequest $request)
+    public function register(AccountRequest $request)
     {
         $validated = $request->validated();
         $validated['password'] = bcrypt($validated['password']);
@@ -21,8 +21,15 @@ class AccountAuthController extends Controller
         $token = $account->createToken('api_token')->plainTextToken;
         return response()->json([
             'account' => new JsonResource($account),
-            'token' => $token,
+            'accessToken' => $token,
         ], 201);
+    }
+
+    public function checkEmail(Request $request)
+    {
+        $email = $request->input('email');
+        $account = Account::where('email', $email)->first();
+        return response()->json(['exists' => $account !== null]);
     }
 
     public function login(LoginAccountRequest $request)
@@ -37,7 +44,7 @@ class AccountAuthController extends Controller
         $token = $account->createToken('api_token')->plainTextToken;
         return response()->json([
             'account' => new JsonResource($account),
-            'token' => $token,
+            'accessToken' => $token,
         ]);
     }
 

@@ -18,4 +18,13 @@ class LoginAccountRequest extends FormRequest
             'password' => 'required|string',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'L\'email est requis.',
+            'email.email' => 'L\'email doit être une adresse email valide.',
+            'password.required' => 'Le mot de passe est requis.',
+        ];
+    }
 }

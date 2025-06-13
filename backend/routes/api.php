@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AccountAuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,8 @@ Route::get('/test', function () {
 // Authentification pour Account
 Route::post('account/register', [AccountAuthController::class, 'register']);
 Route::post('account/login', [AccountAuthController::class, 'login']);
+Route::get('account/check-email', [AccountAuthController::class, 'checkEmail']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('account/logout', [AccountAuthController::class, 'logout']);
     Route::get('account/user', [AccountAuthController::class, 'user']);
@@ -40,3 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('invoices', App\Http\Controllers\InvoiceController::class);
     Route::apiResource('invoice-lines', App\Http\Controllers\InvoiceLineController::class);
 });
+
+// Routes de réinitialisation de mot de passe
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+Route::get('/verify-reset-token/{token}', [PasswordResetController::class, 'verifyResetToken']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);

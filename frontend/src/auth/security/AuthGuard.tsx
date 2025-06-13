@@ -17,13 +17,17 @@ const AuthGuard = ({ Component }: { Component: React.ComponentType<any> }) => {
 
   useEffect(() => {
     const verifyAuth = async () => {
+      console.log(token);
       if (!token) {
+        console.log('no token');
         navigate('/login');
         return;
       }
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
+        console.log('decodedToken', decodedToken);
         const userId: number = Number(decodedToken?.sub);
+        console.log('userId', userId);
         if (!userId) {
           navigate('/login');
           return;
@@ -40,6 +44,7 @@ const AuthGuard = ({ Component }: { Component: React.ComponentType<any> }) => {
           }
         }
       } catch (error) {
+        console.log('error', error);
         navigate('/login');
       }
     };

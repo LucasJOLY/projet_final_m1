@@ -1,14 +1,4 @@
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Link,
-  Container,
-  Paper,
-  FormControlLabel,
-  Checkbox,
-} from '@mui/material';
+import { Box, TextField, Button, Typography, Link, Container, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { signIn } from './store/slice';
@@ -18,6 +8,9 @@ import type { AppDispatch } from '../store';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import LoginBackground from './LoginBackground';
+import CustomCheckbox from '../components/CustomCheckbox';
+import PasswordField from '../components/PasswordField';
 
 interface LoginFormData {
   email: string;
@@ -61,7 +54,6 @@ const Login = () => {
       );
       if (result.meta.requestStatus === 'fulfilled') {
         navigate('/');
-        window.location.reload();
       }
     } catch (error) {
       toast.error(getIntl('fr').formatMessage({ id: 'toast.loginError' }));
@@ -69,96 +61,152 @@ const Login = () => {
   };
 
   return (
-    <Box
-      sx={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100vw',
-        backgroundColor: '#4780ff',
-      }}
-    >
+    <>
+      <LoginBackground />
       <Box
         sx={{
+          height: '100vh',
           display: 'flex',
-          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
+          width: '100vw',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
-        <Paper elevation={3} sx={{ padding: '70px 40px', width: '70%', borderRadius: '20px' }}>
-          <Typography component='h1' variant='h5' align='center' gutterBottom>
-            {getIntl('fr').formatMessage({ id: 'auth.login.title' })}
-          </Typography>
-          <Box component='form' onSubmit={handleSubmit(onSubmit)}>
-            <Controller
-              name='email'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='email'
-                  label={getIntl('fr').formatMessage({ id: 'auth.login.email' })}
-                  autoComplete='email'
-                  autoFocus
-                  error={!!errors.email}
-                  helperText={errors.email?.message}
-                />
-              )}
-            />
-            <Controller
-              name='password'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  name='password'
-                  label={getIntl('fr').formatMessage({ id: 'auth.login.password' })}
-                  type='password'
-                  id='password'
-                  autoComplete='current-password'
-                  error={!!errors.password}
-                  helperText={errors.password?.message}
-                />
-              )}
-            />
-            <Controller
-              name='stayConnected'
-              control={control}
-              render={({ field: { value, onChange } }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      color='primary'
-                      checked={value}
-                      onChange={(e) => onChange(e.target.checked)}
-                    />
-                  }
-                  label={getIntl('fr').formatMessage({ id: 'toast.stayConnected' })}
-                />
-              )}
-            />
-            <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-              {getIntl('fr').formatMessage({ id: 'auth.login.submit' })}
-            </Button>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Link href='/forgot-password' variant='body2'>
-                {getIntl('fr').formatMessage({ id: 'auth.login.forgotPassword' })}
-              </Link>
-              <Link href='/register' variant='body2'>
-                {getIntl('fr').formatMessage({ id: 'auth.login.register' })}
-              </Link>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            maxWidth: '450px',
+            mx: 2,
+          }}
+        >
+          <Paper
+            elevation={3}
+            sx={{
+              padding: { xs: '40px 20px', sm: '50px 40px' },
+              width: '100%',
+              borderRadius: '20px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <Typography
+              component='h1'
+              variant='h4'
+              align='center'
+              gutterBottom
+              sx={{
+                mb: 4,
+                fontWeight: 600,
+                color: 'text.primary',
+              }}
+            >
+              {getIntl('fr').formatMessage({ id: 'auth.login.title' })}
+            </Typography>
+            <Box
+              component='form'
+              onSubmit={handleSubmit(onSubmit)}
+              sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+            >
+              <Controller
+                name='email'
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    id='email'
+                    label={getIntl('fr').formatMessage({ id: 'auth.login.email' })}
+                    autoComplete='email'
+                    autoFocus
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    sx={{ mb: 1 }}
+                  />
+                )}
+              />
+              <Controller
+                name='password'
+                control={control}
+                render={({ field }) => (
+                  <PasswordField
+                    {...field}
+                    label={getIntl('fr').formatMessage({ id: 'auth.login.password' })}
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                  />
+                )}
+              />
+              <Controller
+                name='stayConnected'
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <CustomCheckbox
+                    checked={value}
+                    onChange={onChange}
+                    label={getIntl('fr').formatMessage({ id: 'toast.stayConnected' })}
+                  />
+                )}
+              />
+              <Button
+                type='submit'
+                fullWidth
+                variant='contained'
+                sx={{
+                  mt: 2,
+                  mb: 3,
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                }}
+              >
+                {getIntl('fr').formatMessage({ id: 'auth.login.submit' })}
+              </Button>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mt: 2,
+                }}
+              >
+                <Link
+                  href='/forgot-password'
+                  variant='body2'
+                  sx={{
+                    color: 'text.secondary',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'primary.main',
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {getIntl('fr').formatMessage({ id: 'auth.login.forgotPassword' })}
+                </Link>
+                <Link
+                  href='/register'
+                  variant='body2'
+                  sx={{
+                    color: 'text.secondary',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'primary.main',
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {getIntl('fr').formatMessage({ id: 'auth.login.register' })}
+                </Link>
+              </Box>
             </Box>
-          </Box>
-        </Paper>
+          </Paper>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

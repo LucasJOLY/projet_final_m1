@@ -31,7 +31,7 @@ export const validatePassword = (password: string) => {
 
 export const validateEmail = async (email: string) => {
   const response = await checkEmail(email);
-  if (response && response?.email == email) {
+  if (response && response?.exists) {
     toast.error(getIntl('fr').formatMessage({ id: 'toast.emailAlreadyUsed' }));
     throw new Error();
   }

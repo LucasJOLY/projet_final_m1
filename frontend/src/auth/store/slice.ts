@@ -1,5 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getUser, login, register } from '../api/authAPI';
+import {
+  getUser,
+  login,
+  register,
+  forgotPassword,
+  resetPassword,
+  verifyResetToken,
+} from '../api/authAPI';
 import type { AuthState } from '../types';
 
 const signIn = createAsyncThunk(
@@ -14,6 +21,7 @@ const signIn = createAsyncThunk(
     stayConnected: boolean;
   }) => {
     const response = await login(email, password);
+    console.log(response.accessToken);
     if (stayConnected) {
       localStorage.setItem('token', response.accessToken);
     } else {
@@ -70,9 +78,28 @@ const getMe = createAsyncThunk('auth/getMe', async (userId: number) => {
   return response;
 });
 
+const forgotPasswordAction = createAsyncThunk('auth/forgotPassword', async (email: string) => {
+  const response = await forgotPassword(email);
+  return response;
+});
+
+const resetPasswordAction = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ token, password }: { token: string; password: string }) => {
+    const response = await resetPassword(token, password);
+    return response;
+  }
+);
+
+const verifyResetTokenAction = createAsyncThunk('auth/verifyResetToken', async (token: string) => {
+  const response = await verifyResetToken(token);
+  return response;
+});
+
 const initialState: AuthState = {
   token: localStorage.getItem('token') || sessionStorage.getItem('token'),
   authUser: null,
+  resetTokenValid: null,
 };
 
 const authSlice = createSlice({
@@ -85,9 +112,13 @@ const authSlice = createSlice({
       state.token = null;
       state.authUser = null;
     },
+    clearResetTokenState: (state) => {
+      state.resetTokenValid = null;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(signIn.fulfilled, (state, action) => {
+      console.log(action.payload);
       state.token = action.payload.accessToken;
     });
     builder.addCase(signIn.rejected, (state) => {
@@ -110,9 +141,30 @@ const authSlice = createSlice({
     builder.addCase(getMe.rejected, (state) => {
       state.authUser = null;
     });
+
+    builder.addCase(forgotPasswordAction.fulfilled, (state) => {
+      // L'email a été envoyé avec succès
+    });
+    builder.addCase(forgotPasswordAction.rejected, (state) => {
+      // Gérer l'erreur si nécessaire
+    });
+
+    builder.addCase(resetPasswordAction.fulfilled, (state) => {
+      // Le mot de passe a été réinitialisé avec succès
+    });
+    builder.addCase(resetPasswordAction.rejected, (state) => {
+      // Gérer l'erreur si nécessaire
+    });
+
+    builder.addCase(verifyResetTokenAction.fulfilled, (state, action) => {
+      state.resetTokenValid = action.payload.valid;
+    });
+    builder.addCase(verifyResetTokenAction.rejected, (state) => {
+      state.resetTokenValid = false;
+    });
   },
 });
 
-export { signIn, signUp, getMe };
-export const { logOut } = authSlice.actions;
+export { signIn, signUp, getMe, forgotPasswordAction, resetPasswordAction, verifyResetTokenAction };
+export const { logOut, clearResetTokenState } = authSlice.actions;
 export default authSlice.reducer;

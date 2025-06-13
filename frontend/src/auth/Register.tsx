@@ -9,6 +9,8 @@ import type { AppDispatch } from '../store';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import LoginBackground from './LoginBackground';
+import PasswordField from '../components/PasswordField';
 
 interface RegisterFormData {
   email: string;
@@ -59,6 +61,8 @@ const schema = yup.object().shape({
   expense_rate: yup
     .number()
     .required(getIntl('fr').formatMessage({ id: 'validation.required' }))
+    .min(0, getIntl('fr').formatMessage({ id: 'validation.expenseRateMin' }))
+    .max(100, getIntl('fr').formatMessage({ id: 'validation.expenseRateMax' }))
     .transform((value) => (isNaN(value) ? undefined : value)),
 });
 
@@ -114,219 +118,323 @@ const Register = () => {
   };
 
   return (
-    <Container component='main' maxWidth='xs'>
+    <>
+      <LoginBackground />
       <Box
         sx={{
-          marginTop: 8,
+          minHeight: '100vh',
           display: 'flex',
-          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
+          width: '100vw',
+          position: 'relative',
+          zIndex: 1,
+          py: 4,
         }}
       >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component='h1' variant='h5' align='center' gutterBottom>
-            {getIntl('fr').formatMessage({ id: 'auth.register.title' })}
-          </Typography>
-          <Box component='form' onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
-            <Controller
-              name='name'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='name'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.name' })}
-                  autoComplete='name'
-                  autoFocus
-                  error={!!errors.name}
-                  helperText={errors.name?.message}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            maxWidth: '800px',
+            mx: 2,
+          }}
+        >
+          <Paper
+            elevation={3}
+            sx={{
+              padding: { xs: '40px 20px', sm: '50px 40px' },
+              width: '100%',
+              borderRadius: '20px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <Typography
+              component='h1'
+              variant='h4'
+              align='center'
+              gutterBottom
+              sx={{
+                mb: 4,
+                fontWeight: 600,
+                color: 'text.primary',
+              }}
+            >
+              {getIntl('fr').formatMessage({ id: 'auth.register.title' })}
+            </Typography>
+            <Box
+              component='form'
+              onSubmit={handleSubmit(onSubmit)}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                '& .MuiFormControl-root': {
+                  width: '100%',
+                },
+                '& .MuiGrid-container': {
+                  width: '100%',
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    md: '1fr 1fr',
+                  },
+                  gap: 2,
+                }}
+              >
+                <Controller
+                  name='name'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='name'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.name' })}
+                      autoComplete='name'
+                      autoFocus
+                      error={!!errors.name}
+                      helperText={errors.name?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='first_name'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='first_name'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.firstName' })}
-                  autoComplete='given-name'
-                  error={!!errors.first_name}
-                  helperText={errors.first_name?.message}
+                <Controller
+                  name='first_name'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='first_name'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.firstName' })}
+                      autoComplete='given-name'
+                      error={!!errors.first_name}
+                      helperText={errors.first_name?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='email'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='email'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.email' })}
-                  autoComplete='email'
-                  error={!!errors.email}
-                  helperText={errors.email?.message}
+                <Controller
+                  name='email'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='email'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.email' })}
+                      autoComplete='email'
+                      error={!!errors.email}
+                      helperText={errors.email?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='password'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
+                <Controller
+                  name='birth_date'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='birth_date'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.birthDate' })}
+                      type='date'
+                      error={!!errors.birth_date}
+                      helperText={errors.birth_date?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
+                />
+                <Controller
                   name='password'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.password' })}
-                  type='password'
-                  id='password'
-                  autoComplete='new-password'
-                  error={!!errors.password}
-                  helperText={errors.password?.message}
+                  control={control}
+                  render={({ field }) => (
+                    <PasswordField
+                      {...field}
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.password' })}
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='confirmPassword'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
+                <Controller
                   name='confirmPassword'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.confirmPassword' })}
-                  type='password'
-                  id='confirmPassword'
-                  error={!!errors.confirmPassword}
-                  helperText={errors.confirmPassword?.message}
+                  control={control}
+                  render={({ field }) => (
+                    <PasswordField
+                      {...field}
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.confirmPassword' })}
+                      error={!!errors.confirmPassword}
+                      helperText={errors.confirmPassword?.message}
+                      showScore={false}
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='birth_date'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='birth_date'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.birthDate' })}
-                  type='date'
-                  error={!!errors.birth_date}
-                  helperText={errors.birth_date?.message}
-                  InputLabelProps={{ shrink: true }}
+                <Controller
+                  name='address'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='address'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.address' })}
+                      error={!!errors.address}
+                      helperText={errors.address?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='address'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='address'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.address' })}
-                  error={!!errors.address}
-                  helperText={errors.address?.message}
+                <Controller
+                  name='city'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='city'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.city' })}
+                      error={!!errors.city}
+                      helperText={errors.city?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='city'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='city'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.city' })}
-                  error={!!errors.city}
-                  helperText={errors.city?.message}
+                <Controller
+                  name='phone'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='phone'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.phone' })}
+                      error={!!errors.phone}
+                      helperText={errors.phone?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='phone'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='phone'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.phone' })}
-                  error={!!errors.phone}
-                  helperText={errors.phone?.message}
+                <Controller
+                  name='max_annual_revenue'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='max_annual_revenue'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.maxAnnualRevenue' })}
+                      type='number'
+                      error={!!errors.max_annual_revenue}
+                      helperText={errors.max_annual_revenue?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='max_annual_revenue'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  fullWidth
-                  id='max_annual_revenue'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.maxAnnualRevenue' })}
-                  type='number'
-                  error={!!errors.max_annual_revenue}
-                  helperText={errors.max_annual_revenue?.message}
+                <Controller
+                  name='expense_rate'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      id='expense_rate'
+                      label={getIntl('fr').formatMessage({ id: 'auth.register.expenseRate' })}
+                      type='number'
+                      inputProps={{ min: 0, max: 100 }}
+                      error={!!errors.expense_rate}
+                      helperText={errors.expense_rate?.message}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      variant='outlined'
+                    />
+                  )}
                 />
-              )}
-            />
-            <Controller
-              name='expense_rate'
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  margin='normal'
-                  fullWidth
-                  id='expense_rate'
-                  label={getIntl('fr').formatMessage({ id: 'auth.register.expenseRate' })}
-                  type='number'
-                  error={!!errors.expense_rate}
-                  helperText={errors.expense_rate?.message}
-                />
-              )}
-            />
-            <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-              {getIntl('fr').formatMessage({ id: 'auth.register.submit' })}
-            </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <Link href='/login' variant='body2'>
-                {getIntl('fr').formatMessage({ id: 'auth.register.login' })}
-              </Link>
+              </Box>
+              <Button
+                type='submit'
+                fullWidth
+                variant='contained'
+                sx={{
+                  mt: 2,
+                  mb: 3,
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                }}
+              >
+                {getIntl('fr').formatMessage({ id: 'auth.register.submit' })}
+              </Button>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  mt: 2,
+                }}
+              >
+                <Link
+                  href='/login'
+                  variant='body2'
+                  sx={{
+                    color: 'text.secondary',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'primary.main',
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {getIntl('fr').formatMessage({ id: 'auth.register.login' })}
+                </Link>
+              </Box>
             </Box>
-          </Box>
-        </Paper>
+          </Paper>
+        </Box>
       </Box>
-    </Container>
+    </>
   );
 };
 

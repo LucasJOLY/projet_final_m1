@@ -62,7 +62,50 @@ export const getUser = async (userId: number): Promise<User> => {
   return user;
 };
 
-export const checkEmail = async (email: string): Promise<User> => {
-  const response = await configAPI.get(`accounts?email=${email}`);
-  return response.data[0];
+export const checkEmail = async (email: string): Promise<{ exists: boolean }> => {
+  const response = await configAPI.get(`account/check-email?email=${email}`);
+  return response.data;
+};
+
+export const forgotPassword = async (email: string): Promise<void> => {
+  try {
+    await configAPI.post('auth/forgot-password', { email });
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      toast.error(
+        error.response?.data?.message ||
+          getIntl('fr').formatMessage({ id: 'toast.resetPasswordError' })
+      );
+    }
+    throw error;
+  }
+};
+
+export const resetPassword = async (token: string, password: string): Promise<void> => {
+  try {
+    await configAPI.post('auth/reset-password', { token, password });
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      toast.error(
+        error.response?.data?.message ||
+          getIntl('fr').formatMessage({ id: 'toast.resetPasswordError' })
+      );
+    }
+    throw error;
+  }
+};
+
+export const verifyResetToken = async (token: string): Promise<{ valid: boolean }> => {
+  try {
+    const response = await configAPI.get(`auth/verify-reset-token/${token}`);
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      toast.error(
+        error.response?.data?.message ||
+          getIntl('fr').formatMessage({ id: 'toast.resetPasswordError' })
+      );
+    }
+    throw error;
+  }
 };

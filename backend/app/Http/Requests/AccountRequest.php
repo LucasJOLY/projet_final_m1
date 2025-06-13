@@ -27,7 +27,6 @@ class AccountRequest extends FormRequest
             'max_annual_revenue' => 'required|numeric',
             'expense_rate' => 'required|numeric',
             'password' => 'required|string|min:8',
-            'is_admin' => 'required|boolean',
         ];
     }
 
@@ -58,8 +57,6 @@ class AccountRequest extends FormRequest
             'password.required' => 'Le mot de passe est requis.',
             'password.string' => 'Le mot de passe doit être une chaîne de caractères.',
             'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
-            'is_admin.required' => 'Le rôle est requis.',
-            'is_admin.boolean' => 'Le rôle doit être soit "admin" soit "user".',
         ];
     }
 

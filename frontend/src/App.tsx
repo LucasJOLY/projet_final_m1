@@ -4,6 +4,8 @@ import Login from './auth/Login';
 import Register from './auth/Register';
 import ForgotPassword from './auth/ForgotPassword';
 import AuthGuard from './auth/security/AuthGuard';
+import ResetPassword from './auth/ResetPassword';
+import NotFound from './pages/NotFound';
 
 const App = () => {
   return (
@@ -23,6 +25,10 @@ const App = () => {
 
       {/* Route par défaut */}
       <Route path='*' element={<Navigate to='/' replace />} />
+
+      {/* Nouvelles routes */}
+      <Route path='/reset-password/:token' element={<ResetPassword />} />
+      <Route path='/reset-password' element={<NotFound />} />
     </Routes>
   );
 };
