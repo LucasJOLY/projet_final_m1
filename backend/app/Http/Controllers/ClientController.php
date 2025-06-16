@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\BaseController;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\ClientRequest;
 
-class ClientController extends Controller
+class ClientController extends BaseController
 {
     public function index(Request $request)
     {
@@ -49,40 +50,40 @@ class ClientController extends Controller
         }
 
         $perPage = $request->integer('per_page', 20);
-        return JsonResource::collection($query->paginate($perPage));
+        return $this->sendResponse(JsonResource::collection($query->paginate($perPage)));
     }
 
     public function store(ClientRequest $request)
     {
         $validated = $request->validated();
         $client = Client::create($validated);
-        return new JsonResource($client);
+        return $this->sendCreated(new JsonResource($client), 'client');
     }
 
     public function show(Client $client, Request $request)
     {
         if ($request->user()->id !== $client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
-        return new JsonResource($client);
+        return $this->sendResponse(new JsonResource($client));
     }
 
     public function update(ClientRequest $request, Client $client)
     {
         if ($request->user()->id !== $client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $validated = $request->validated();
         $client->update($validated);
-        return new JsonResource($client);
+        return $this->sendUpdated(new JsonResource($client), 'client');
     }
 
     public function destroy(Client $client, Request $request)
     {
         if ($request->user()->id !== $client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $client->delete();
-        return response()->json(['message' => 'Client supprimé avec succès.']);
+        return $this->sendDeleted('client');
     }
 }

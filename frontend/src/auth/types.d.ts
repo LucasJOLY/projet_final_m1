@@ -1,6 +1,6 @@
 import { Follow } from '../profil/type';
 
-interface User {
+export interface User {
   id: number;
   name: string;
   first_name: string;
@@ -12,13 +12,22 @@ interface User {
   expense_rate: number;
   email: string;
   password: string;
-  accessToken: string;
 }
 
-interface AuthState {
+export interface AuthResponse {
+  token: {
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+  };
+  account: User;
+}
+
+export interface AuthState {
   token: string | null;
   authUser: User | null;
   resetTokenValid: boolean | null;
+  loadingSendEmail: boolean;
 }
 
 interface PasswordStrength {

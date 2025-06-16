@@ -13,15 +13,21 @@ class BaseController extends Controller
      *
      * @param  array $result
      * @param  string $message
+     * @param  string $resource
      * @return JsonResponse
      */
-    public function sendResponse($result, $message): JsonResponse
+    public function sendResponse($result, $message = null, $resource = null): JsonResponse
     {
         $response = [
             'success' => true,
             'data'    => $result,
-            'message' => $message,
         ];
+
+        if ($message) {
+            $response['message'] = $message;
+        } elseif ($resource) {
+            $response['message'] = __('messages.created', ['resource' => __('messages.resources.' . $resource)]);
+        }
 
         return response()->json($response, 200);
     }
@@ -46,5 +52,60 @@ class BaseController extends Controller
         }
 
         return response()->json($response, $code);
+    }
+
+    /**
+     * Réponse de succès pour la création
+     *
+     * @param  mixed  $result
+     * @param  string $resource
+     * @return JsonResponse
+     */
+    public function sendCreated($result, $resource): JsonResponse
+    {
+        return $this->sendResponse($result, null, $resource);
+    }
+
+    /**
+     * Réponse de succès pour la mise à jour
+     *
+     * @param  mixed  $result
+     * @param  string $resource
+     * @return JsonResponse
+     */
+    public function sendUpdated($result, $resource): JsonResponse
+    {
+        return $this->sendResponse($result, __('messages.updated', ['resource' => __('messages.resources.' . $resource)]));
+    }
+
+    /**
+     * Réponse de succès pour la suppression
+     *
+     * @param  string $resource
+     * @return JsonResponse
+     */
+    public function sendDeleted($resource): JsonResponse
+    {
+        return $this->sendResponse(null, __('messages.deleted', ['resource' => __('messages.resources.' . $resource)]));
+    }
+
+    /**
+     * Réponse d'erreur d'accès interdit
+     *
+     * @return JsonResponse
+     */
+    public function sendForbidden(): JsonResponse
+    {
+        return $this->sendError(__('messages.forbidden'), [], 403);
+    }
+
+    /**
+     * Réponse d'erreur de ressource non trouvée
+     *
+     * @return JsonResponse
+     */
+    public function sendNotFound(): JsonResponse
+    {
+        return $this->sendError(__('messages.not_found'), [], 404);
     }
 }

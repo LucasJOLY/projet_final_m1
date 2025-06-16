@@ -138,6 +138,7 @@ const Login = () => {
                     label={getIntl('fr').formatMessage({ id: 'auth.login.password' })}
                     error={!!errors.password}
                     helperText={errors.password?.message}
+                    showScore={false}
                   />
                 )}
               />

@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\BaseController;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\InvoiceRequest;
 
-class InvoiceController extends Controller
+class InvoiceController extends BaseController
 {
     public function index(Request $request)
     {
@@ -33,10 +34,10 @@ class InvoiceController extends Controller
                 $query->where($field, $request->input($field));
             }
             if ($request->filled($field . '_min')) {
-                $query->where($field, '>=', $request->input($field + '_min'));
+                $query->where($field, '>=', $request->input($field . '_min'));
             }
-            if ($request->filled($field + '_max')) {
-                $query->where($field, '<=', $request->input($field + '_max'));
+            if ($request->filled($field . '_max')) {
+                $query->where($field, '<=', $request->input($field . '_max'));
             }
         }
 
@@ -50,40 +51,40 @@ class InvoiceController extends Controller
         }
 
         $perPage = $request->integer('per_page', 20);
-        return JsonResource::collection($query->paginate($perPage));
+        return $this->sendResponse(JsonResource::collection($query->paginate($perPage)));
     }
 
     public function store(InvoiceRequest $request)
     {
         $validated = $request->validated();
         $invoice = Invoice::create($validated);
-        return new JsonResource($invoice);
+        return $this->sendCreated(new JsonResource($invoice), 'invoice');
     }
 
     public function show(Invoice $invoice, Request $request)
     {
         if ($request->user()->id !== $invoice->quote->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
-        return new JsonResource($invoice);
+        return $this->sendResponse(new JsonResource($invoice));
     }
 
     public function update(InvoiceRequest $request, Invoice $invoice)
     {
         if ($request->user()->id !== $invoice->quote->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $validated = $request->validated();
         $invoice->update($validated);
-        return new JsonResource($invoice);
+        return $this->sendUpdated(new JsonResource($invoice), 'invoice');
     }
 
     public function destroy(Invoice $invoice, Request $request)
     {
-        if ($request->user()->id !== $invoice->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+        if ($request->user()->id !== $invoice->quote->project->client->account_id) {
+            return $this->sendForbidden();
         }
         $invoice->delete();
-        return response()->json(['message' => 'Facture supprimée avec succès.']);
+        return $this->sendDeleted('invoice');
     }
 }

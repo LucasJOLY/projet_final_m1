@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\BaseController;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\AccountRequest;
 
-class AccountController extends Controller
+class AccountController extends BaseController
 {
     public function index(Request $request)
     {
@@ -54,7 +55,7 @@ class AccountController extends Controller
         }
 
         $perPage = $request->integer('per_page', 20);
-        return JsonResource::collection($query->paginate($perPage));
+        return $this->sendResponse(JsonResource::collection($query->paginate($perPage)));
     }
 
     public function store(AccountRequest $request)
@@ -62,36 +63,36 @@ class AccountController extends Controller
         $validated = $request->validated();
         $validated['password'] = bcrypt($validated['password']);
         $account = Account::create($validated);
-        return new JsonResource($account);
+        return $this->sendCreated(new JsonResource($account), 'account');
     }
 
-    public function show(Account $account, Request $request)
+    public function show($locale, Account $account, Request $request)
     {
         if ($request->user()->id !== $account->id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
-        return new JsonResource($account);
+        return $this->sendResponse(new JsonResource($account));
     }
 
     public function update(AccountRequest $request, Account $account)
     {
         if ($request->user()->id !== $account->id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $validated = $request->validated();
         if (isset($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
         }
         $account->update($validated);
-        return new JsonResource($account);
+        return $this->sendUpdated(new JsonResource($account), 'account');
     }
 
     public function destroy(Account $account, Request $request)
     {
         if ($request->user()->id !== $account->id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $account->delete();
-        return response()->json(['message' => 'Compte supprimé avec succès.']);
+        return $this->sendDeleted('account');
     }
 }

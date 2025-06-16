@@ -1,14 +1,14 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Box, TextField, Button, Typography, Link, Paper } from '@mui/material';
+import { Box, TextField, Button, Typography, Link, Paper, CircularProgress } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { forgotPasswordAction } from './store/slice';
 import LoginBackground from './LoginBackground';
 import { getIntl } from '../language/config/translation';
-import type { AppDispatch } from '../store';
+import type { AppDispatch, RootState } from '../store';
 
 const schema = yup.object().shape({
   email: yup
@@ -25,6 +25,8 @@ const ForgotPassword = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
+  const loadingSendEmail = useSelector((state: RootState) => state.auth.loadingSendEmail);
+
   const {
     control,
     handleSubmit,
@@ -35,8 +37,10 @@ const ForgotPassword = () => {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
-      await dispatch(forgotPasswordAction(data.email));
-      navigate('/login');
+      const response = await dispatch(forgotPasswordAction(data.email));
+      if (response.meta.requestStatus === 'fulfilled') {
+        navigate('/login');
+      }
     } catch (error) {
       // L'erreur est déjà gérée dans l'API
     }
@@ -107,21 +111,28 @@ const ForgotPassword = () => {
                 name='email'
                 control={control}
                 defaultValue=''
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    required
-                    fullWidth
-                    label={getIntl('fr').formatMessage({ id: 'auth.forgotPassword.email' })}
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                  />
-                )}
+                render={({ field }) =>
+                  loadingSendEmail ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                      <CircularProgress size={24} />
+                    </Box>
+                  ) : (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      label={getIntl('fr').formatMessage({ id: 'auth.forgotPassword.email' })}
+                      error={!!errors.email}
+                      helperText={errors.email?.message}
+                    />
+                  )
+                }
               />
               <Button
                 type='submit'
                 fullWidth
                 variant='contained'
+                disabled={loadingSendEmail}
                 sx={{
                   mt: 2,
                   mb: 3,

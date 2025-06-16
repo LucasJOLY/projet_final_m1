@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\BaseController;
 use App\Models\Quote;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Requests\QuoteRequest;
 
-class QuoteController extends Controller
+class QuoteController extends BaseController
 {
     public function index(Request $request)
     {
@@ -48,40 +49,40 @@ class QuoteController extends Controller
         }
 
         $perPage = $request->integer('per_page', 20);
-        return JsonResource::collection($query->paginate($perPage));
+        return $this->sendResponse(JsonResource::collection($query->paginate($perPage)));
     }
 
     public function store(QuoteRequest $request)
     {
         $validated = $request->validated();
         $quote = Quote::create($validated);
-        return new JsonResource($quote);
+        return $this->sendCreated(new JsonResource($quote), 'quote');
     }
 
     public function show(Quote $quote, Request $request)
     {
         if ($request->user()->id !== $quote->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
-        return new JsonResource($quote);
+        return $this->sendResponse(new JsonResource($quote));
     }
 
     public function update(QuoteRequest $request, Quote $quote)
     {
         if ($request->user()->id !== $quote->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $validated = $request->validated();
         $quote->update($validated);
-        return new JsonResource($quote);
+        return $this->sendUpdated(new JsonResource($quote), 'quote');
     }
 
     public function destroy(Quote $quote, Request $request)
     {
         if ($request->user()->id !== $quote->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $quote->delete();
-        return response()->json(['message' => 'Devis supprimé avec succès.']);
+        return $this->sendDeleted('quote');
     }
 }

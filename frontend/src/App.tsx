@@ -19,8 +19,10 @@ const App = () => {
       <Route path='/' element={<AuthGuard Component={MainLayout} />}>
         <Route index element={<Navigate to='/dashboard' replace />} />
         <Route path='dashboard' element={<div>Dashboard</div>} />
-        <Route path='profile' element={<div>Profil</div>} />
-        <Route path='settings' element={<div>Paramètres</div>} />
+        <Route path='clients' element={<div>Clients</div>} />
+        <Route path='projects' element={<div>Projets</div>} />
+        <Route path='invoices' element={<div>Factures</div>} />
+        <Route path='users' element={<div>Utilisateurs</div>} />
       </Route>
 
       {/* Route par défaut */}

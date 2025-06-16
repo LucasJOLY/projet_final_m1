@@ -8,30 +8,44 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ProjectRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [
-            'client_id' => 'required|exists:clients,id',
-            'name' => 'required|string|max:255',
-            'status' => 'required|integer',
+            'client_id' => ['required', 'exists:clients,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'string', 'in:draft,in_progress,completed,cancelled'],
         ];
     }
 
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
-            'client_id.required' => 'L\'identifiant du client est requis.',
-            'client_id.exists' => 'Le client spécifié n\'existe pas.',
-            'name.required' => 'Le nom du projet est requis.',
-            'name.string' => 'Le nom du projet doit être une chaîne de caractères.',
-            'name.max' => 'Le nom du projet ne doit pas dépasser 255 caractères.',
-            'status.required' => 'Le statut est requis.',
-            'status.integer' => 'Le statut doit être un entier.',
+            'client_id.required' => __('messages.validation.client_id.required'),
+            'client_id.exists' => __('messages.validation.client_id.exists'),
+            'name.required' => __('messages.validation.name.required'),
+            'name.string' => __('messages.validation.name.string'),
+            'name.max' => __('messages.validation.name.max'),
+            'status.required' => __('messages.validation.status.required'),
+            'status.string' => __('messages.validation.status.string'),
+            'status.in' => __('messages.validation.status.in'),
         ];
     }
 

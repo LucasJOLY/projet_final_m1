@@ -2,6 +2,13 @@ import type { PasswordStrength } from './types';
 import { toast } from 'react-toastify';
 import { checkEmail } from './api/authAPI';
 import { getIntl } from '../language/config/translation';
+import axios from 'axios';
+
+interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
 
 export const calculatePasswordStrength = (pass: string): PasswordStrength => {
   let score = 0;
@@ -34,5 +41,61 @@ export const validateEmail = async (email: string) => {
   if (response && response?.exists) {
     toast.error(getIntl('fr').formatMessage({ id: 'toast.emailAlreadyUsed' }));
     throw new Error();
+  }
+};
+
+export const setTokens = (tokens: TokenResponse, stayConnected: boolean = false) => {
+  const storage = stayConnected ? localStorage : sessionStorage;
+  console.log(storage);
+  storage.setItem('access_token', tokens.access_token);
+  storage.setItem('refresh_token', tokens.refresh_token);
+  storage.setItem('token_expiry', String(Date.now() + tokens.expires_in * 1000));
+};
+
+export const getTokens = () => {
+  const storage = localStorage.getItem('access_token') ? localStorage : sessionStorage;
+  return {
+    access_token: storage.getItem('access_token'),
+    refresh_token: storage.getItem('refresh_token'),
+    token_expiry: storage.getItem('token_expiry'),
+  };
+};
+
+export const clearTokens = () => {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('token_expiry');
+  sessionStorage.removeItem('access_token');
+  sessionStorage.removeItem('refresh_token');
+  sessionStorage.removeItem('token_expiry');
+};
+
+export const isTokenExpired = () => {
+  const { token_expiry } = getTokens();
+  if (!token_expiry) return true;
+  return Date.now() > parseInt(token_expiry);
+};
+
+export const refreshToken = async () => {
+  const { refresh_token } = getTokens();
+  if (!refresh_token) {
+    throw new Error('No refresh token available');
+  }
+
+  try {
+    const locale = localStorage.getItem('locale') || 'fr';
+    const response = await axios.post<TokenResponse>(
+      `${import.meta.env.VITE_BACKEND_URL + locale + '/'}account/refresh`,
+      {
+        refresh_token,
+      }
+    );
+
+    const { access_token, refresh_token: newRefreshToken, expires_in } = response.data;
+    setTokens({ access_token, refresh_token: newRefreshToken, expires_in });
+    return access_token;
+  } catch (error) {
+    clearTokens();
+    throw error;
   }
 };

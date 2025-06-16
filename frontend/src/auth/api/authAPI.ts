@@ -2,7 +2,7 @@ import { toast } from 'react-toastify';
 import { configAPI } from '../../config/apiConfig';
 import { AxiosError } from 'axios';
 import { getIntl } from '../../language/config/translation';
-import type { User } from '../types';
+import type { User, AuthResponse } from '../types';
 
 export const register = async (
   email: string,
@@ -15,7 +15,7 @@ export const register = async (
   phone: string,
   max_annual_revenue: number,
   expense_rate: number
-): Promise<User> => {
+): Promise<AuthResponse> => {
   try {
     const response = await configAPI.post(`account/register`, {
       email,
@@ -36,13 +36,14 @@ export const register = async (
   }
 };
 
-export const login = async (email: string, password: string): Promise<User> => {
+export const login = async (email: string, password: string): Promise<AuthResponse> => {
   try {
     const response = await configAPI.post(`account/login`, {
       email,
       password,
     });
-    return response.data;
+    toast.success(response.data.message);
+    return response.data.data;
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data === 'Incorrect password') {
       toast.error(getIntl('fr').formatMessage({ id: 'toast.wrongPassword' }));
@@ -69,7 +70,7 @@ export const checkEmail = async (email: string): Promise<{ exists: boolean }> =>
 
 export const forgotPassword = async (email: string): Promise<void> => {
   try {
-    await configAPI.post('auth/forgot-password', { email });
+    await configAPI.post('forgot-password', { email });
   } catch (error) {
     if (error instanceof AxiosError) {
       toast.error(
@@ -78,12 +79,14 @@ export const forgotPassword = async (email: string): Promise<void> => {
       );
     }
     throw error;
+  } finally {
+    toast.success(getIntl('fr').formatMessage({ id: 'toast.emailSentResetPassword' }));
   }
 };
 
 export const resetPassword = async (token: string, password: string): Promise<void> => {
   try {
-    await configAPI.post('auth/reset-password', { token, password });
+    await configAPI.post('reset-password', { token, password });
   } catch (error) {
     if (error instanceof AxiosError) {
       toast.error(
@@ -97,7 +100,7 @@ export const resetPassword = async (token: string, password: string): Promise<vo
 
 export const verifyResetToken = async (token: string): Promise<{ valid: boolean }> => {
   try {
-    const response = await configAPI.get(`auth/verify-reset-token/${token}`);
+    const response = await configAPI.get(`verify-reset-token/${token}`);
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {

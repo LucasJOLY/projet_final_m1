@@ -53,8 +53,10 @@ const ResetPassword = () => {
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (token) {
       try {
-        await dispatch(resetPasswordAction({ token, password: data.password }));
-        navigate('/login');
+        const response = await dispatch(resetPasswordAction({ token, password: data.password }));
+        if (response.meta.requestStatus === 'fulfilled') {
+          navigate('/login');
+        }
       } catch (error) {
         // L'erreur est déjà gérée dans l'API
       }

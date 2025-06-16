@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class ClientRequest extends FormRequest
 {
@@ -16,42 +17,49 @@ class ClientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_id' => 'required|exists:accounts,id',
-            'name' => 'required|string|max:255',
-            'contact_name' => 'required|string|max:255',
-            'contact_first_name' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'phone' => 'required|string|max:30',
-            'email' => 'required|email',
+            'account_id' => ['required', 'exists:accounts,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'contact_name' => ['required', 'string', 'max:255'],
+            'contact_first_name' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('clients')->ignore($this->client),
+            ],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'account_id.required' => 'L\'identifiant du compte est requis.',
-            'account_id.exists' => 'Le compte spécifié n\'existe pas.',
-            'name.required' => 'Le nom du client est requis.',
-            'name.string' => 'Le nom du client doit être une chaîne de caractères.',
-            'name.max' => 'Le nom du client ne doit pas dépasser 255 caractères.',
-            'contact_name.required' => 'Le nom du contact est requis.',
-            'contact_name.string' => 'Le nom du contact doit être une chaîne de caractères.',
-            'contact_name.max' => 'Le nom du contact ne doit pas dépasser 255 caractères.',
-            'contact_first_name.required' => 'Le prénom du contact est requis.',
-            'contact_first_name.string' => 'Le prénom du contact doit être une chaîne de caractères.',
-            'contact_first_name.max' => 'Le prénom du contact ne doit pas dépasser 255 caractères.',
-            'address.required' => 'L\'adresse est requise.',
-            'address.string' => 'L\'adresse doit être une chaîne de caractères.',
-            'address.max' => 'L\'adresse ne doit pas dépasser 255 caractères.',
-            'city.required' => 'La ville est requise.',
-            'city.string' => 'La ville doit être une chaîne de caractères.',
-            'city.max' => 'La ville ne doit pas dépasser 255 caractères.',
-            'phone.required' => 'Le numéro de téléphone est requis.',
-            'phone.string' => 'Le numéro de téléphone doit être une chaîne de caractères.',
-            'phone.max' => 'Le numéro de téléphone ne doit pas dépasser 30 caractères.',
-            'email.required' => 'L\'email est requis.',
-            'email.email' => 'L\'email doit être une adresse email valide.',
+            'account_id.required' => __('messages.validation.account_id.required'),
+            'account_id.exists' => __('messages.validation.account_id.exists'),
+            'name.required' => __('messages.validation.name.required'),
+            'name.string' => __('messages.validation.name.string'),
+            'name.max' => __('messages.validation.name.max'),
+            'contact_name.required' => __('messages.validation.contact_name.required'),
+            'contact_name.string' => __('messages.validation.contact_name.string'),
+            'contact_name.max' => __('messages.validation.contact_name.max'),
+            'contact_first_name.required' => __('messages.validation.contact_first_name.required'),
+            'contact_first_name.string' => __('messages.validation.contact_first_name.string'),
+            'contact_first_name.max' => __('messages.validation.contact_first_name.max'),
+            'address.required' => __('messages.validation.address.required'),
+            'address.string' => __('messages.validation.address.string'),
+            'address.max' => __('messages.validation.address.max'),
+            'city.required' => __('messages.validation.city.required'),
+            'city.string' => __('messages.validation.city.string'),
+            'city.max' => __('messages.validation.city.max'),
+            'phone.required' => __('messages.validation.phone.required'),
+            'phone.string' => __('messages.validation.phone.string'),
+            'phone.max' => __('messages.validation.phone.max'),
+            'email.required' => __('messages.validation.email.required'),
+            'email.email' => __('messages.validation.email.email'),
+            'email.max' => __('messages.validation.email.max'),
+            'email.unique' => __('messages.validation.email.unique'),
         ];
     }
 

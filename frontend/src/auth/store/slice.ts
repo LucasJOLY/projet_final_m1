@@ -7,31 +7,37 @@ import {
   resetPassword,
   verifyResetToken,
 } from '../api/authAPI';
-import type { AuthState } from '../types';
+import type { AuthState, AuthResponse } from '../types';
+import { setTokens, clearTokens } from '../service';
 
-const signIn = createAsyncThunk(
-  'auth/login',
-  async ({
-    email,
-    password,
-    stayConnected,
-  }: {
+const signIn = createAsyncThunk<
+  AuthResponse,
+  {
     email: string;
     password: string;
     stayConnected: boolean;
-  }) => {
-    const response = await login(email, password);
-    console.log(response.accessToken);
-    if (stayConnected) {
-      localStorage.setItem('token', response.accessToken);
-    } else {
-      sessionStorage.setItem('token', response.accessToken);
-    }
-    return response;
   }
-);
+>('auth/login', async ({ email, password, stayConnected }) => {
+  const response = await login(email, password);
+  setTokens(response.token, stayConnected);
+  return response;
+});
 
-const signUp = createAsyncThunk(
+const signUp = createAsyncThunk<
+  AuthResponse,
+  {
+    name: string;
+    first_name: string;
+    birth_date: string;
+    address: string;
+    city: string;
+    phone: string;
+    max_annual_revenue: number;
+    expense_rate: number;
+    email: string;
+    password: string;
+  }
+>(
   'auth/register',
   async ({
     name,
@@ -44,17 +50,6 @@ const signUp = createAsyncThunk(
     expense_rate,
     email,
     password,
-  }: {
-    name: string;
-    first_name: string;
-    birth_date: string;
-    address: string;
-    city: string;
-    phone: string;
-    max_annual_revenue: number;
-    expense_rate: number;
-    email: string;
-    password: string;
   }) => {
     const response = await register(
       email,
@@ -68,7 +63,7 @@ const signUp = createAsyncThunk(
       max_annual_revenue,
       expense_rate
     );
-    localStorage.setItem('token', response.accessToken);
+    setTokens(response.token, true);
     return response;
   }
 );
@@ -96,42 +91,38 @@ const verifyResetTokenAction = createAsyncThunk('auth/verifyResetToken', async (
   return response;
 });
 
-const initialState: AuthState = {
-  token: localStorage.getItem('token') || sessionStorage.getItem('token'),
-  authUser: null,
-  resetTokenValid: null,
-};
+const logout = createAsyncThunk('auth/logout', async () => {
+  clearTokens();
+  return null;
+});
 
 const authSlice = createSlice({
   name: 'auth',
-  initialState,
+  initialState: {
+    token: localStorage.getItem('access_token') || sessionStorage.getItem('access_token'),
+    authUser: null,
+    resetTokenValid: null,
+    loadingSendEmail: false,
+  } as AuthState,
   reducers: {
-    logOut: (state) => {
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
-      state.token = null;
-      state.authUser = null;
-    },
     clearResetTokenState: (state) => {
       state.resetTokenValid = null;
     },
   },
   extraReducers: (builder) => {
     builder.addCase(signIn.fulfilled, (state, action) => {
-      console.log(action.payload);
-      state.token = action.payload.accessToken;
+      state.authUser = action.payload.account;
+      state.token = action.payload.token.access_token;
     });
     builder.addCase(signIn.rejected, (state) => {
-      state.token = null;
-    });
-    builder.addCase(signUp.fulfilled, (state, action) => {
-      state.token = action.payload.accessToken;
-    });
-    builder.addCase(signUp.rejected, (state) => {
+      state.authUser = null;
       state.token = null;
     });
 
-    builder.addCase(getMe.pending, (state) => {
+    builder.addCase(signUp.fulfilled, (state, action) => {
+      state.authUser = action.payload.account;
+    });
+    builder.addCase(signUp.rejected, (state) => {
       state.authUser = null;
     });
 
@@ -142,18 +133,27 @@ const authSlice = createSlice({
       state.authUser = null;
     });
 
+    builder.addCase(logout.fulfilled, (state) => {
+      state.authUser = null;
+      state.token = null;
+    });
+
     builder.addCase(forgotPasswordAction.fulfilled, (state) => {
-      // L'email a été envoyé avec succès
+      state.loadingSendEmail = false;
+    });
+    builder.addCase(forgotPasswordAction.pending, (state) => {
+      state.loadingSendEmail = true;
     });
     builder.addCase(forgotPasswordAction.rejected, (state) => {
-      // Gérer l'erreur si nécessaire
+      state.loadingSendEmail = false;
+      // Gérer l'état si nécessaire
     });
 
     builder.addCase(resetPasswordAction.fulfilled, (state) => {
-      // Le mot de passe a été réinitialisé avec succès
+      // Gérer l'état si nécessaire
     });
     builder.addCase(resetPasswordAction.rejected, (state) => {
-      // Gérer l'erreur si nécessaire
+      // Gérer l'état si nécessaire
     });
 
     builder.addCase(verifyResetTokenAction.fulfilled, (state, action) => {
@@ -165,6 +165,14 @@ const authSlice = createSlice({
   },
 });
 
-export { signIn, signUp, getMe, forgotPasswordAction, resetPasswordAction, verifyResetTokenAction };
-export const { logOut, clearResetTokenState } = authSlice.actions;
+export {
+  signIn,
+  signUp,
+  getMe,
+  forgotPasswordAction,
+  resetPasswordAction,
+  verifyResetTokenAction,
+  logout,
+};
+export const { clearResetTokenState } = authSlice.actions;
 export default authSlice.reducer;

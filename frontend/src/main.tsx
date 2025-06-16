@@ -33,6 +33,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               draggable
               pauseOnHover
               theme='light'
+              style={{ fontFamily: 'Nunito' }}
             />
             <App />
           </ThemeProvider>

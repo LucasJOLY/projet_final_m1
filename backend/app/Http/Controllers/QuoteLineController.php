@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\BaseController;
 use App\Models\QuoteLine;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Requests\QuoteLineRequest;
 
-class QuoteLineController extends Controller
+class QuoteLineController extends BaseController
 {
     public function index(Request $request)
     {
@@ -47,40 +48,40 @@ class QuoteLineController extends Controller
         }
 
         $perPage = $request->integer('per_page', 20);
-        return JsonResource::collection($query->paginate($perPage));
+        return $this->sendResponse(JsonResource::collection($query->paginate($perPage)));
     }
 
     public function store(QuoteLineRequest $request)
     {
         $validated = $request->validated();
         $quoteLine = QuoteLine::create($validated);
-        return new JsonResource($quoteLine);
+        return $this->sendCreated(new JsonResource($quoteLine), 'quote_line');
     }
 
     public function show(QuoteLine $quoteLine, Request $request)
     {
         if ($request->user()->id !== $quoteLine->quote->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
-        return new JsonResource($quoteLine);
+        return $this->sendResponse(new JsonResource($quoteLine));
     }
 
     public function update(QuoteLineRequest $request, QuoteLine $quoteLine)
     {
         if ($request->user()->id !== $quoteLine->quote->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $validated = $request->validated();
         $quoteLine->update($validated);
-        return new JsonResource($quoteLine);
+        return $this->sendUpdated(new JsonResource($quoteLine), 'quote_line');
     }
 
     public function destroy(QuoteLine $quoteLine, Request $request)
     {
         if ($request->user()->id !== $quoteLine->quote->project->client->account_id) {
-            return response()->json(['message' => 'Accès interdit.'], 403);
+            return $this->sendForbidden();
         }
         $quoteLine->delete();
-        return response()->json(['message' => 'Ligne de devis supprimée avec succès.']);
+        return $this->sendDeleted('quote_line');
     }
 }

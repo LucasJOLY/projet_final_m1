@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Requests\AccountRequest;
 use App\Models\Account;
 use Illuminate\Http\Request;
@@ -10,52 +11,89 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Requests\LoginAccountRequest;
+use Illuminate\Support\Facades\Http;
+use Laravel\Passport\RefreshTokenRepository;
+use Laravel\Passport\TokenRepository;
 
-class AccountAuthController extends Controller
+class AccountAuthController extends BaseController
 {
     public function register(AccountRequest $request)
     {
         $validated = $request->validated();
         $validated['password'] = bcrypt($validated['password']);
         $account = Account::create($validated);
-        $token = $account->createToken('api_token')->plainTextToken;
-        return response()->json([
-            'account' => new JsonResource($account),
-            'accessToken' => $token,
-        ], 201);
+        return $this->sendResponse(
+            new JsonResource($account),
+            __('messages.register_success')
+        );
     }
 
     public function checkEmail(Request $request)
     {
         $email = $request->input('email');
         $account = Account::where('email', $email)->first();
-        return response()->json(['exists' => $account !== null]);
+        return $this->sendResponse(['exists' => $account !== null]);
     }
 
     public function login(LoginAccountRequest $request)
     {
         $validated = $request->validated();
-        $account = Account::where('email', $validated['email'])->first();
-        if (! $account || ! Hash::check($validated['password'], $account->password)) {
+
+        try {
+            $response = Http::asForm()->post(config('app.url') . '/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => '01976af6-a2c1-7082-a456-60fdc8e03c79',
+                'client_secret' => 'hrD1HX7cEuhSgYYFx8g6SIRkLxyVm4QpLdyYQhAc',
+                'username' => $validated['email'],
+                'password' => $validated['password'],
+                'scope' => '',
+            ]);
+        } catch (RequestException $e) {
             throw ValidationException::withMessages([
-                'email' => ['Les identifiants sont invalides.'],
+                'email' => [__('messages.error')],
             ]);
         }
-        $token = $account->createToken('api_token')->plainTextToken;
-        return response()->json([
-            'account' => new JsonResource($account),
-            'accessToken' => $token,
-        ]);
+
+        if ($response->failed()) {
+            throw ValidationException::withMessages([
+                'email' => [__('messages.login_error')],
+            ]);
+        }
+
+        $account = Account::where('email', $validated['email'])->first();
+
+        return $this->sendResponse([
+            'token' => $response->json(),
+            'account' => new JsonResource($account)
+        ], __('messages.login_success'));
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Déconnexion réussie.']);
+        $request->user()->token()->revoke();
+        return $this->sendResponse(null, __('messages.logout_success'));
     }
 
     public function user(Request $request)
     {
-        return new JsonResource($request->user());
+        return $this->sendResponse(new JsonResource($request->user()));
+    }
+
+    public function refresh(Request $request)
+    {
+        $request->validate([
+            'refresh_token' => 'required|string',
+        ]);
+        $http = Http::asForm()->post(config('app.url') . '/oauth/token', [
+            'grant_type' => 'refresh_token',
+            'refresh_token' => $request->refresh_token,
+            'client_id' => config('passport.password_client_id'),
+            'client_secret' => config('passport.password_client_secret'),
+            'scope' => '',
+        ]);
+        if ($http->failed()) {
+            return $this->sendError(__('messages.refresh_token_invalid'), [], 401);
+        }
+        return $this->sendResponse($http->json());
     }
 }
