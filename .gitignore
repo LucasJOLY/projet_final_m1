@@ -8,5 +8,3 @@ backend/vendor
 backend/public/storage
 backend/storage
 backend/bootstrap/cache
-backend/bootstrap/app.php
-backend/bootstrap/app.php
