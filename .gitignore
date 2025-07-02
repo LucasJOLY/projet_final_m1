@@ -1,0 +1,12 @@
+
+frontend/.env
+backend/.env
+
+frontend/node_modules
+backend/node_modules
+backend/vendor
+backend/public/storage
+backend/storage
+backend/bootstrap/cache
+backend/bootstrap/app.php
+backend/bootstrap/app.php
