@@ -1,0 +1,20 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Tout champ de formulaire et ligne de tableau doit avoir un composant optimisé à la valeur (par exemple, calendrier
+pour une date) et les données doivent être correctement validées (y compris, par exemple, les plages de dates).
+– Tous les champs des formulaires doivent être validés. Si utilisation d’une API toutes les données doivent aussi être
+validées côté API.
+– Chaque validation aura son propre message d’erreur (pas de message générique).
+– Chaque résultat d’opération doit déclencher l’affichage d’un message d’information à destination de l’utilisateur
+lui indiquant que tout s’est bien passé (ou pas…). Les suppressions doivent être confirmées par l’utilisateur.
+– Comme dans tout application de comptabilité les montants en € devront être affichés correctement (symbole €,
+alignement à droite, arrondis à 2 chiffres après la virgule).
+– Les dates doivent toutes être affichées au format long (ex : lundi 12 septembre 2021) hors des tableaux et
+graphiques et au format cours (12/09/2021) dans les tableaux et graphiques.
+- J'utilise typescript pour le frontend
+- Dans mon frontend, j'utilise un système de changement de langue chaque texte doit etre traduis dans le fichier anglais et le fichier francaiq.
+- Utilises toujours les bonnes pratique (pour laravel mais également pour react)
+-Tous les accès aux URL, API et données doivent être sécurisés.

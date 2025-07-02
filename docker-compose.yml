@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Service Laravel
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./backend:/var/www
+    networks:
+      - app-network
+
+  # Service Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx
+    restart: unless-stopped
+    ports:
+      - '8000:80'
+    volumes:
+      - ./backend:/var/www
+      - ./backend/docker/nginx/conf.d:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  # Service MySQL
+  db:
+    image: mysql:8.0
+    container_name: laravel_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-project_m1}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-test}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    networks:
+      - app-network
+
+  # Service phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: laravel_phpmyadmin
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+    ports:
+      - '8080:80'
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
