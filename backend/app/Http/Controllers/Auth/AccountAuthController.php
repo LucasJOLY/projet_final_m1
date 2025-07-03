@@ -42,8 +42,8 @@ class AccountAuthController extends BaseController
         try {
             $response = Http::asForm()->post(config('app.url') . '/oauth/token', [
                 'grant_type' => 'password',
-                'client_id' => '01976af6-a2c1-7082-a456-60fdc8e03c79',
-                'client_secret' => 'hrD1HX7cEuhSgYYFx8g6SIRkLxyVm4QpLdyYQhAc',
+                'client_id' => config('passport.password_client_id'),
+                'client_secret' => config('passport.password_client_secret'),
                 'username' => $validated['email'],
                 'password' => $validated['password'],
                 'scope' => '',
